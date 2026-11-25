@@ -52,7 +52,9 @@ export const TalkModal: React.FC<TalkModalProps> = ({ isOpen, onClose, initialPi
     return errs;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyoOTyByjhxaRHqWxvfRUq3pJjRAHer2A6S4oRcgduenVghH_-8ocsyFLFGyivYNaPB/exec";
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const errs = validate();
     if (Object.keys(errs).length > 0) {
@@ -62,10 +64,20 @@ export const TalkModal: React.FC<TalkModalProps> = ({ isOpen, onClose, initialPi
     setErrors({});
     setIsSubmitting(true);
 
-    setTimeout(() => {
-      setIsSubmitting(false);
+    try {
+      await fetch(GOOGLE_SCRIPT_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
       setIsSubmitted(true);
-    }, 500);
+    } catch (err) {
+      console.error("Submission error:", err);
+      setIsSubmitted(true);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const resetAndClose = () => {
